@@ -1,0 +1,89 @@
+For the purposes of this report, SDEs can be conceptually viewed as differential equations
+with an additional random term that introduces stochastic fluctuations to their dyamics. 
+
+To illustrate, consider the deterministic differential equation:
+
+\begin{equation*}
+    dx = \mu(x(t),t)dt.
+\end{equation*}
+
+Here, $x(t)$ is a deterministic variable with a drift term $\mu(x(t), t)$, mapping $\mathbb{R} \times[0, \infty) \to \mathbb{R}$. 
+By adding stochasticity through Brownian motion
+
+\begin{equation}\label{eq:sde}
+    dX = \mu(X(t),t)dt + \sigma(X(t), t)dW
+\end{equation}
+
+where $X(t)$ is now a stochastic process. Here, $\mu(X(t), t)dt$ continues to be the deterministic drift term, while
+$\sigma(X_t, t)$ is known as the \textit{diffusion term}, scaling the stochastic fluctuations introduced by the 
+Wiener process $W_t$. The increments of $W_t$ are normally distributed as follows:
+
+\begin{equation*}
+    dW \sim \mathcal{N}(0, dt).
+\end{equation*}
+
+By selecting a sufficiently small time step $\Delta t$, we discretise equation \eqref{eq:sde} to 
+numerically approximate the differential as:
+
+\begin{equation}\label{eq:differential_approximation}
+    \Delta X = \mu(X(t), t)\Delta t + \sigma(X(t), t) \Delta W
+\end{equation}
+
+Equation \eqref{eq:differential_approximation} can be used in an iterative approach to obtain a 
+sample trajectory of the SDE in equation \eqref{eq:sde}:
+
+\begin{equation}\label{eq:forward_euler}
+    X(t + \Delta t) = X(t) + \Delta X.
+\end{equation}
+
+This method is called the Euler-Maruyama method, a stochastic
+analogue of the forward Euler method \cite{erban2020stochastic}. 
+
+As $X(t)$ is a stochastic process, 
+at any fixed time $t$, $X(t)$ has a distribution described by its 
+probability distribution function (PDF).
+To obtain the PDF of the random variable $X(t)$ at a given time $t$, two main approaches exist. Firstly, using
+the Euler-Maruyama method one can generate
+$n$ independent trajectories of the SDE. Provided $n$ is sufficiently large, one can construct 
+an empirical density from the realisations of $X(t)$ at time $t$. This approach is called the Monte Carlo method, 
+and its accuracy depends on the number of samples $n$. By the central limit theorem, the error in 
+estimating the PDF decreases like:
+
+\begin{equation*} 
+    \text{Error} \sim \mathcal{O}(n^{-1/2}). 
+\end{equation*}
+
+
+This means that to halve the error we must quadruple the number of samples. This can make Monte Carlo methods
+computationally expensive for high precision estimates. 
+
+An alternative approach to determining the PDF is through the Fokker-Planck equation.
+The Fokker-Planck equatino is a partial differenial equation (PDE) describing the evolution of the PDF $p(x, t)$ 
+associated with $X(t)$. For the SDE given in equation \eqref{eq:sde}, the corresponding Fokker-Planck equation is:
+
+\begin{equation}
+    \frac{\partial p(x,t)}{\partial t} = -\frac{\partial}{\partial x}\left[ \mu(x,t) p(x,t) \right] + \frac{1}{2}\frac{\partial^2}{\partial x^2}\left[ \sigma^2(x,t) p(x,t) \right],
+\end{equation}
+
+where $p(x,t)$ is the probability density function of the random variable $X_t$. 
+Solving this PDE can directly yield the PDF without the sampling noise inherent in Monte Carlo simulations.
+
+For systems involving multiple interacting stochastic processes, we consider a system of coupled SDEs:
+
+\begin{equation}
+    d\mathbf{X}_t = \boldsymbol{\mu}(\mathbf{X}_t, t),dt + \boldsymbol{\Sigma}(\mathbf{X}_t, t), d\mathbf{W}_t,
+\end{equation}
+
+where $\mathbf{X}_t \in \mathbb{R}^n$ is a vector-valued stochastic process, $\boldsymbol{\mu}(\mathbf{X}_t, t)$ 
+is a vector of drift terms, $\boldsymbol{\Sigma}(\mathbf{X}_t, t)$ is a diffusion matrix, and 
+$\mathbf{W}_t \in \mathbb{R}^m$ is a vector of independent Wiener processes. The associated Fokker-Planck
+equation describing the evolution of the joint probability density $p(\mathbf{x}, t)$ for the system is given by:
+
+\begin{equation}
+    \frac{\partial p(\mathbf{x}, t)}{\partial t} = -\nabla_{\mathbf{x}} \cdot \left[ \boldsymbol{\mu}(\mathbf{x}, t) p(\mathbf{x}, t) \right] 
+    + \frac{1}{2} \nabla_{\mathbf{x}} \cdot \left( \nabla_{\mathbf{x}} \cdot \left[ \boldsymbol{\Sigma}(\mathbf{x}, t) \boldsymbol{\Sigma}(\mathbf{x}, t)^T p(\mathbf{x}, t) \right] \right).
+\end{equation}
+
+where $\nabla_{\mathbf{x}}$ is the gradient operator with respect to the spatial variables $\mathbf{x}$.
+Solving this PDE provides a direct method for obtaining the joint probability distributions of systems of 
+interacting stochastic systems.
